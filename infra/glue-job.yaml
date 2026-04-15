@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  S3Bucket:
+    Type: String
+  ScriptKey:
+    Type: String
+
+Resources:
+
+  GlueJobRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: GlueJobExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+
+  GlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: sample-glue-job
+      Role: !GetAtt GlueJobRole.Arn
+
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub s3://${S3Bucket}/${ScriptKey}
+        PythonVersion: 3
+
+      GlueVersion: "5.0"
+
+      DefaultArguments:
+        "--job-language": "python"
+        "--enable-continuous-cloudwatch-log": "true"
+
+      MaxRetries: 1
+      Timeout: 30
+      WorkerType: G.1X
+      NumberOfWorkers: 2
