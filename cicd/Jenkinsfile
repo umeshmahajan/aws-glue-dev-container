@@ -1,0 +1,87 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = 'us-east-1'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Determine Environment') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME.startsWith("feature/") || env.BRANCH_NAME == "develop") {
+                        env.ENV = "dev"
+                    } else if (env.BRANCH_NAME.startsWith("release/")) {
+                        env.ENV = "qa"
+                    } else if (env.BRANCH_NAME == "main") {
+                        env.ENV = "prod"
+                    } else {
+                        error "Unsupported branch: ${env.BRANCH_NAME}"
+                    }
+                }
+            }
+        }
+
+        stage('Load Config') {
+            steps {
+                script {
+                    def config = readJSON file: "infra/params/${env.ENV}.json"
+                    env.S3_BUCKET = config.S3Bucket
+                    env.GLUE_JOB_NAME = config.GlueJobName
+                    env.WORKER_TYPE = config.WorkerType
+                    env.NUM_WORKERS = config.NumberOfWorkers
+                }
+            }
+        }
+
+        stage('Build & Package') {
+            steps {
+                sh 'bash cicd/scripts/package.sh'
+            }
+        }
+
+        stage('Upload to S3') {
+            steps {
+                sh """
+                aws s3 cp build/ s3://${S3_BUCKET}/artifacts/${ENV}/ --recursive
+                """
+            }
+        }
+
+        stage('Deploy CloudFormation') {
+            steps {
+                sh """
+                aws cloudformation deploy \
+                  --template-file infra/glue-job.yaml \
+                  --stack-name glue-${ENV}-stack \
+                  --capabilities CAPABILITY_NAMED_IAM \
+                  --parameter-overrides \
+                    Environment=${ENV} \
+                    S3Bucket=${S3_BUCKET} \
+                    ScriptKey=artifacts/${ENV}/sample_job.py \
+                    GlueJobName=${GLUE_JOB_NAME} \
+                    WorkerType=${WORKER_TYPE} \
+                    NumberOfWorkers=${NUM_WORKERS}
+                """
+            }
+        }
+
+        stage('Trigger Glue Job (Optional)') {
+            when {
+                expression { env.ENV == "dev" }
+            }
+            steps {
+                sh """
+                aws glue start-job-run --job-name ${GLUE_JOB_NAME}
+                """
+            }
+        }
+    }
+}
