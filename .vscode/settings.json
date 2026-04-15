@@ -1,0 +1,23 @@
+{
+  "python.defaultInterpreterPath": "/usr/bin/python3",
+
+  "editor.formatOnSave": true,
+  "python.formatting.provider": "black",
+
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+
+  "python.analysis.extraPaths": [
+    "/home/hadoop/workspace/src",
+    "/usr/lib/spark/python",
+    "/usr/lib/spark/python/lib/py4j-src.zip"
+  ],
+
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  },
+
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true
+}
