@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  glue:
+    image: public.ecr.aws/glue/aws-glue-libs:5
+    container_name: glue5_dev
+    tty: true
+    stdin_open: true
+
+    volumes:
+      - ./:/home/hadoop/workspace
+      - ~/.aws:/home/hadoop/.aws
+
+    working_dir: /home/hadoop/workspace
+
+    environment:
+      - AWS_PROFILE=default
+
+    ports:
+      - "4040:4040"
+      - "18080:18080"
