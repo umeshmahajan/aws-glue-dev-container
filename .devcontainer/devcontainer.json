@@ -1,0 +1,15 @@
+{
+  "name": "Glue 5 Dev Container",
+  "dockerComposeFile": "../docker/docker-compose.yml",
+  "service": "glue",
+  "workspaceFolder": "/home/hadoop/workspace",
+
+  "settings": {
+    "python.defaultInterpreterPath": "/usr/bin/python3"
+  },
+
+  "extensions": [
+    "ms-python.python",
+    "ms-toolsai.jupyter"
+  ]
+}
