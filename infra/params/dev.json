@@ -1,0 +1,7 @@
+{
+  "Environment": "dev",
+  "S3Bucket": "my-glue-dev-bucket",
+  "GlueJobName": "sample-glue-job-dev",
+  "WorkerType": "G.1X",
+  "NumberOfWorkers": "2"
+}
