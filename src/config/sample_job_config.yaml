@@ -1,0 +1,27 @@
+dev:
+  source:
+    path: "s3://your-dev-bucket/input/data.csv"
+    format: "csv"
+    options:
+      header: true
+
+  destination:
+    path: "s3://your-dev-bucket/output/"
+    format: "parquet"
+    mode: "overwrite"
+
+  table:
+    database: "dev_db"
+    name: "output_table"
+
+qa:
+  source:
+    path: "s3://your-qa-bucket/input/data.csv"
+    format: "csv"
+    options:
+      header: true
+
+  destination:
+    path: "s3://your-qa-bucket/output/"
+    format: "parquet"
+    mode: "overwrite"
