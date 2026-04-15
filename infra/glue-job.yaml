@@ -1,17 +1,28 @@
-AWSTemplateFormatVersion: '2010-09-09'
-
 Parameters:
+  Environment:
+    Type: String
+
   S3Bucket:
     Type: String
+
   ScriptKey:
     Type: String
+
+  GlueJobName:
+    Type: String
+
+  WorkerType:
+    Type: String
+
+  NumberOfWorkers:
+    Type: Number
 
 Resources:
 
   GlueJobRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: GlueJobExecutionRole
+      RoleName: !Sub GlueJobRole-${Environment}
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -25,7 +36,7 @@ Resources:
   GlueJob:
     Type: AWS::Glue::Job
     Properties:
-      Name: sample-glue-job
+      Name: !Ref GlueJobName
       Role: !GetAtt GlueJobRole.Arn
 
       Command:
@@ -35,11 +46,10 @@ Resources:
 
       GlueVersion: "5.0"
 
+      WorkerType: !Ref WorkerType
+      NumberOfWorkers: !Ref NumberOfWorkers
+
       DefaultArguments:
         "--job-language": "python"
         "--enable-continuous-cloudwatch-log": "true"
-
-      MaxRetries: 1
-      Timeout: 30
-      WorkerType: G.1X
-      NumberOfWorkers: 2
+        "--ENV": !Ref Environment
