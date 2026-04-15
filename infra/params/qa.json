@@ -1,0 +1,7 @@
+{
+  "Environment": "qa",
+  "S3Bucket": "my-glue-qa-bucket",
+  "GlueJobName": "sample-glue-job-qa",
+  "WorkerType": "G.1X",
+  "NumberOfWorkers": "3"
+}
